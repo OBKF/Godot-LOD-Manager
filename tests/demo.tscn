@@ -1,0 +1,64 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://addons/lod_manager/lod_manager.gd" type="Script" id=1]
+[ext_resource path="res://prefabs/Cone.tscn" type="PackedScene" id=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Label
+
+func _ready():
+	pass
+	
+# warning-ignore:unused_argument
+func _process(delta):
+	text = \"%s VERTICES\"%Performance.get_monitor(Performance.RENDER_VERTICES_IN_FRAME)
+"
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Camera
+
+func _ready():
+	pass
+
+func _process(delta):
+	var speed = 20
+	var dir  =  Vector3()
+	if Input.is_action_pressed(\"ui_up\"):
+		dir += Vector3.FORWARD
+	if Input.is_action_pressed(\"ui_down\"):
+		dir += Vector3.BACK
+	if Input.is_action_pressed(\"ui_right\"):
+		dir += Vector3.RIGHT
+	if Input.is_action_pressed(\"ui_left\"):
+		dir += Vector3.LEFT
+		
+	dir = dir.normalized()
+	
+	translate_object_local(dir * delta * speed)
+	
+"
+
+[node name="LOD Test" type="Spatial"]
+
+[node name="dbg" type="Label" parent="."]
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 40.0
+margin_bottom = 14.0
+rect_scale = Vector2( 2, 2 )
+script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LODManager" type="Node" parent="."]
+script = ExtResource( 1 )
+lods = [ "default", "cones" ]
+lod_ranges = [ [ 0, 20, 40, 80, 160 ], [ 0, 10, 25, 40, 100 ] ]
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6 )
+far = 8192.0
+script = SubResource( 2 )
+
+[node name="Cone" parent="." instance=ExtResource( 2 )]
